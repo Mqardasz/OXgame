@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/17.0.12" fx:controller="lab.oxgame.MainController">
+   <padding>
+      <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+   </padding>
+   <Label fx:id="statusLabel" text="Nowa gra!" />
+   <GridPane fx:id="gameBoard" hgap="5" vgap="5">
+      <Button fx:id="btn0" onAction="#handleMove" text=" " GridPane.columnIndex="0" GridPane.rowIndex="0" />
+      <Button fx:id="btn1" onAction="#handleMove" text=" " GridPane.columnIndex="1" GridPane.rowIndex="0" />
+      <Button fx:id="btn2" onAction="#handleMove" text=" " GridPane.columnIndex="2" GridPane.rowIndex="0" />
+      <Button fx:id="btn3" onAction="#handleMove" text=" " GridPane.columnIndex="0" GridPane.rowIndex="1" />
+      <Button fx:id="btn4" onAction="#handleMove" text=" " GridPane.columnIndex="1" GridPane.rowIndex="1" />
+      <Button fx:id="btn5" onAction="#handleMove" text=" " GridPane.columnIndex="2" GridPane.rowIndex="1" />
+      <Button fx:id="btn6" onAction="#handleMove" text=" " GridPane.columnIndex="0" GridPane.rowIndex="2" />
+      <Button fx:id="btn7" onAction="#handleMove" text=" " GridPane.columnIndex="1" GridPane.rowIndex="2" />
+      <Button fx:id="btn8" onAction="#handleMove" text=" " GridPane.columnIndex="2" GridPane.rowIndex="2" />
+      <columnConstraints>
+         <ColumnConstraints />
+         <ColumnConstraints />
+         <ColumnConstraints />
+      </columnConstraints>
+      <rowConstraints>
+         <RowConstraints />
+         <RowConstraints />
+         <RowConstraints />
+      </rowConstraints>
+   </GridPane>
+   <Button onAction="#restartGame" text="Restart" />
+</VBox>
