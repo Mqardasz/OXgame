@@ -2,7 +2,6 @@ package lab.oxgame;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -14,127 +13,51 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.layout.GridPane;
 import lab.oxgame.dao.RozgrywkaDAO;
+import lab.oxgame.dao.RozgrywkaDAOImpl;
+import lab.oxgame.engine.OXGameImpl;
 import lab.oxgame.exception.DBException;
 import lab.oxgame.model.OXEnum;
 import lab.oxgame.model.Rozgrywka;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.layout.GridPane;
-import lab.oxgame.engine.OXGameImpl;
-import lab.oxgame.dao.RozgrywkaDAOImpl;
+
 public class MainController {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(MainController.class);
 	private RozgrywkaDAO rozgrywkaDAO;
 	private ExecutorService executor;
-	
+
+	@FXML
+	private Label statusLabel;
+	@FXML
+	private GridPane gameBoard;
+	@FXML
+	private ListView<String> gameHistoryList;
+
+	private OXGameImpl game;
+
 	public MainController() {
 		this.rozgrywkaDAO = new RozgrywkaDAOImpl();
 		this.executor = Executors.newSingleThreadExecutor();
 		this.game = new OXGameImpl();
 	}
-	
-	@FXML
-	public void onActionBtnNew(ActionEvent event) {
-		executor.execute(() -> testDB());
-	}
-	
-	private void testDB() {
-		try {
-			// Testowanie metody save() - dodawanie kilku rekordów
-		    Rozgrywka rozgrywka1 = new Rozgrywka("GraczO1", "GraczX1", OXEnum.BRAK, LocalDateTime.now());
-		    Rozgrywka rozgrywka2 = new Rozgrywka("GraczO2", "GraczX2", OXEnum.O, LocalDateTime.now().minusHours(1));
-		    Rozgrywka rozgrywka3 = new Rozgrywka("GraczO3", "GraczX3", OXEnum.X, LocalDateTime.now().minusDays(1));
-
-		    rozgrywkaDAO.save(rozgrywka1);
-		    rozgrywkaDAO.save(rozgrywka2);
-		    rozgrywkaDAO.save(rozgrywka3);
-
-		    logger.info("Dodano kilka nowych rozgrywek do bazy.");
-	
-	        // Testowanie metody findAll()
-	        List<Rozgrywka> wszystkieRozgrywki = rozgrywkaDAO.findAll();
-	        logger.info("Wszystkie rozgrywki w bazie:");
-	        for (Rozgrywka rozgrywka : wszystkieRozgrywki) {
-	        	logger.info(rozgrywka.toString());
-	        }
-	
-	        // Testowanie metody findById()
-	        if (!wszystkieRozgrywki.isEmpty()) {
-	            Integer testId = wszystkieRozgrywki.get(0).getRozgrywkaId();
-	            Optional<Rozgrywka> znalezionaRozgrywka = rozgrywkaDAO.findById(testId);
-	            if (znalezionaRozgrywka.isPresent()) {
-	            	logger.info("Znaleziono rozgrywkę o ID " + testId + ": " + znalezionaRozgrywka.toString());
-	            } else {
-	            	logger.info("Nie znaleziono rozgrywki o ID " + testId);
-	            }
-	        }
-	
-	        // Testowanie metody deleteById()
-	        if (!wszystkieRozgrywki.isEmpty()) {
-	            Integer deleteId = wszystkieRozgrywki.get(0).getRozgrywkaId();
-	            rozgrywkaDAO.deleteById(deleteId);
-	            logger.info("Usunięto rozgrywkę o ID: " + deleteId);
-	        }
-	
-	        // Testowanie metody deleteAll()
-	        rozgrywkaDAO.deleteAll();
-	        logger.info("Usunięto wszystkie rozgrywki z bazy.");
-	
-	        // Ponowny test findAll() po usunięciu
-	        List<Rozgrywka> pusteRozgrywki = rozgrywkaDAO.findAll();
-	        if (pusteRozgrywki.isEmpty()) {
-	        	logger.info("Baza danych jest pusta.");
-	        } else {
-	        	logger.info("Baza danych nadal zawiera rozgrywki: " + pusteRozgrywki);
-	        }
-
-		
-		} catch(DBException e) {
-			logger.error("Blad podczas operacji bazodanowych!", e);
-			String errDetails = e.getCause().getMessage();
-			Platform.runLater(() -> showError(e.getMessage(), errDetails));
-		}
-	}
-	
-	public void shutdown() {
-		executor.shutdownNow();
-	}
-	
-	private void showError(String testHeader, String textContent) {
-		Alert alert = new Alert(AlertType.ERROR);
-		alert.setTitle("Error dialog");
-		alert.setHeaderText(testHeader);
-		alert.setContentText(textContent);
-		alert.showAndWait();
-	}
-
-
-	@FXML
-	private Label statusLabel;
-
-	@FXML
-	private GridPane gameBoard;
-
-	private OXGameImpl game;
-
-
-	@FXML
-	private Button btn0, btn1, btn2, btn3, btn4, btn5, btn6, btn7, btn8;
-
 
 	@FXML
 	public void initialize() {
 		updateBoard();
+		loadGameHistory();
 	}
 
 	@FXML
-	public void handleMove(javafx.event.ActionEvent event) {
+	public void handleMove(ActionEvent event) {
 		Button clickedButton = (Button) event.getSource();
 		int index = GridPane.getRowIndex(clickedButton) * 3 + GridPane.getColumnIndex(clickedButton);
 		if (game.wykonajRuch(index)) {
 			updateBoard();
+			saveGameState();
 		}
 		if (game.getZwyciezca() != OXEnum.BRAK) {
 			statusLabel.setText("Zwycięzca: " + game.getZwyciezca());
@@ -157,5 +80,51 @@ public class MainController {
 			button.setText(stan[i].toString());
 			button.setDisable(stan[i] != OXEnum.BRAK || game.getZwyciezca() != OXEnum.BRAK);
 		}
+	}
+
+	// Method to load game history from the database
+	public void loadGameHistory() {
+		executor.execute(() -> {
+			try {
+				List<Rozgrywka> rozgrywki = rozgrywkaDAO.findAll();
+				Platform.runLater(() -> {
+					gameHistoryList.getItems().clear();
+					for (Rozgrywka rozgrywka : rozgrywki) {
+						gameHistoryList.getItems().add(rozgrywka.toString());
+					}
+				});
+			} catch (DBException e) {
+				logger.error("Blad podczas pobierania historii gier!", e);
+				String errDetails = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
+				Platform.runLater(() -> showError(e.getMessage(), errDetails));
+			}
+		});
+	}
+
+	// Method to save the current game state to the database
+	private void saveGameState() {
+		executor.execute(() -> {
+			try {
+				Rozgrywka currentGame = new Rozgrywka("GraczX", "GraczO", game.getZwyciezca(), LocalDateTime.now());
+				rozgrywkaDAO.save(currentGame);
+				Platform.runLater(() -> loadGameHistory()); // Reload history to reflect new game state
+			} catch (DBException e) {
+				logger.error("Blad podczas zapisywania stanu gry!", e);
+				String errDetails = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
+				Platform.runLater(() -> showError(e.getMessage(), errDetails));
+			}
+		});
+	}
+
+	public void shutdown() {
+		executor.shutdownNow();
+	}
+
+	private void showError(String testHeader, String textContent) {
+		Alert alert = new Alert(AlertType.ERROR);
+		alert.setTitle("Error dialog");
+		alert.setHeaderText(testHeader);
+		alert.setContentText(textContent);
+		alert.showAndWait();
 	}
 }

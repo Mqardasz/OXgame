@@ -4,7 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/17.0.12" fx:controller="lab.oxgame.MainController">
+<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/17.0.6" fx:controller="lab.oxgame.MainController">
    <padding>
       <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
    </padding>
@@ -31,4 +31,5 @@
       </rowConstraints>
    </GridPane>
    <Button onAction="#restartGame" text="Restart" />
+   <ListView fx:id="gameHistoryList" prefHeight="200.0" prefWidth="380.0" />
 </VBox>
