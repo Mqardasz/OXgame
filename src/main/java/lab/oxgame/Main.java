@@ -11,18 +11,18 @@ public class Main extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		// Initialize the database
+		// zainicjuj baze danych (gdyby byla pusta)
 		DBinitializer.initialize();
-
+		// zaladuj GUI
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/oxgame/Main.fxml"));
 		Parent root = loader.load();
 		primaryStage.setTitle("OX Game");
 		primaryStage.setScene(new Scene(root));
 		primaryStage.show();
 
-		// Get the controller instance
+		// instancja klasy MainController
 		MainController controller = loader.getController();
-		// Load game history when the application starts
+		// wczytaj historie gier
 		controller.loadGameHistory();
 	}
 

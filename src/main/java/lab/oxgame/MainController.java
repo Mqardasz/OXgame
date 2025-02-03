@@ -82,7 +82,7 @@ public class MainController {
 		}
 	}
 
-	// Method to load game history from the database
+	// ladowanie historii gier
 	public void loadGameHistory() {
 		executor.execute(() -> {
 			try {
@@ -101,7 +101,7 @@ public class MainController {
 		});
 	}
 
-	// Method to save the current game state to the database
+	// zapisywanie stanu gry
 	private void saveGameState() {
 		executor.execute(() -> {
 			try {
